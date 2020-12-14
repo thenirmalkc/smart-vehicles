@@ -5,7 +5,7 @@ let lifespan = 300
 let index = 0
 
 // population
-let population_size = 100
+let population_size = 200
 let mutation_rate = 0.05
 
 // vehicle
