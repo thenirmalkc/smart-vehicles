@@ -35,7 +35,7 @@ class Population {
     for(let i = 0; i < this.population_size; i ++) {
       this.population[i].dna.calc_fitness(this.target, this.population[i].location)
       if(this.population[i].destroyed) {
-        this.population[i].dna.fitness *= 0.8
+        this.population[i].dna.fitness *= 0.5
       }
       this.total_fitness += this.population[i].dna.fitness
     }

@@ -23,7 +23,7 @@ class DNA {
     let distance = Vector2D.sub(target, location)
       .mag()
     if(distance < 1) distance = 1
-    distance = Math.pow(distance, 4)
+    distance = Math.pow(distance, 2)
     this.fitness = 1 / distance
   }
 
