@@ -24,7 +24,6 @@ let wall = {
 
 
 function setup() {
-
   const canvas = createCanvas(width, height)
   canvas.position((windowWidth - width) / 2, (windowHeight - height) / 2)
   background(40)

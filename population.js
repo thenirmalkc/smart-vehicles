@@ -56,10 +56,10 @@ class Population {
     for(let i = 0; i < this.parents_size; i ++) {
       let pick = Math.random()
 
-      for(let i = 0; i < this.population_size; i ++) {
-        pick -= this.population[i].dna.prob
+      for(let j = 0; j < this.population_size; j ++) {
+        pick -= this.population[j].dna.prob
         if(pick <= 0) {
-          this.parents.push(this.population[i])
+          this.parents.push(this.population[j])
           break
         }
       }
@@ -100,6 +100,7 @@ class Population {
       this.population[i].update()
     }
   }
+
 
   // displays the population
   display() {

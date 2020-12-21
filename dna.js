@@ -30,11 +30,9 @@ class DNA {
 
   // performs crossover
   static cross_over(parents) {
-
     let dna = new DNA(lifespan)
 
     let partner = [...parents]
-
     let partner1 = partner.splice(Math.floor(Math.random() * partner.length), 1)[0]
     let partner2 = partner.splice(Math.floor(Math.random() * partner.length), 1)[0]
 
