@@ -1,75 +1,60 @@
 class Vehicle {
 
-  constructor(x, y) {
-    this.mass = 1
-    this.max_speed = 4
-    this.max_force = 0.2
+    constructor(x, y, lifespan) {
+        this.dead = false;
 
-    this.location = new Vector2D(x, y)
-    this.velocity = new Vector2D(0, 0)
-    this.acceleration = new Vector2D(0, 0)
+        this.pos = new Vec2(x, y);
+        this.vel = new Vec2(0, 0);
+        this.acc = new Vec2(0, 0);
+        this.dna;
+        
+        this.mass = 1;
 
-    // genetics
-    this.dna = new DNA(lifespan)
-    this.destroyed = false
-  }
+        this.maxSpeed = 1.5;
+        this.maxForce = 0.05;
+    }
 
+    calc_SteeringForce(time) {
+        let desVel = this.dna.genes[time];
+        desVel.setMag(this.maxSpeed);
 
-  set_mass(mass) {
-    this.mass = mass
-  }
+        let sf = Vec2.sub(desVel, this.vel);
+        sf.limit(this.maxForce);
 
+        return sf;
+    }
 
-  // applies force
-  apply_force(force) {
-    force = force.copy()
+    applyForce(force) {
+        // force = mass * acceleration
+        this.acc = force.div(this.mass);
+    }
 
-    // applying force and changing acceleration
-    // acceleration = force / mass
-    this.acceleration.add(force.div(this.mass))
-  }
+    update() {
+        this.vel.add(this.acc);
+        this.pos.add(this.vel);
 
+        this.acc.mult(0);
+    }
 
-  // updates vehicle's velocity and location
-  update() {
+    display() {
+        const vel = this.vel.copy();
 
-    // updating velocity by acceleration
-    this.velocity.add(this.acceleration)
-    this.velocity.limit(this.max_speed)
+        if (vel.x == 0 && vel.y == 0)
+            vel.set(0, -1);
 
-    // updating location by velocity
-    this.location.add(this.velocity)
+        vel.setMag(8);
 
-    // resetting acceleration
-    this.acceleration.mult(0)
-  }
+        const p2 = Vec2.add(this.pos, vel);
+        const p1 = Vec2.add(this.pos, vel.copy().mult(-1).rotate( 0.4));
+        const p3 = Vec2.add(this.pos, vel.copy().mult(-1).rotate(-0.4));
 
+        noStroke();
+        fill(color(240, 120));
+        triangle(
+            p1.x, p1.y,
+            p2.x, p2.y,
+            p3.x, p3.y
+        );
+    }
 
-  // displays vehicle
-  display() {
-
-    // calculating 3 points for triangle
-    const p2 = this.velocity
-      .copy()
-      .set_mag(10)
-      .add(this.location)
-
-    const p1 = this.velocity
-      .copy()
-      .set_mag(10)
-      .mult(-1)
-      .rotate_in_degree(20)
-      .add(this.location)
-
-    const p3 = this.velocity
-      .copy()
-      .set_mag(10)
-      .mult(-1)
-      .rotate_in_degree(-20)
-      .add(this.location)
-
-    noStroke()
-    fill(255, 100)
-    triangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y)
-  }
 }

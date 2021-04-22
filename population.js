@@ -1,111 +1,132 @@
 class Population {
 
-  constructor(population_size, mutation_rate, target) {
-    this.population_size = population_size
-    this.population = []
-    this.parents_size = 16 // minimum 2
-    this.parents = []
+    constructor(size, lifespan, mutationRate) {
+        this.size = size;
 
-    this.generation = 0
-    this.mutation_rate = mutation_rate
-    this.total_fitness = 0
+        this.population = [];
+        this.parents = [];
 
-    this.target = target
-  }
-
-
-  // generates population
-  generate() {
-    this.population = []
-
-    for(let i = 0; i < this.population_size; i ++) {
-      this.population.push(new Vehicle(width / 2, 580))
-      this.population[i].dna.generate_random_genes()
+        this.generation = 0;
+        this.lifespan = lifespan; // in sec
+        this.mutationRate = mutationRate;
     }
 
-    this.generation += 1
-  }
-
-
-  // calculates fitness
-  calc_fitness() {
-    this.total_fitness = 0
-    this.best_individual = this.population[0]
-
-    for(let i = 0; i < this.population_size; i ++) {
-      this.population[i].dna.calc_fitness(this.target, this.population[i].location)
-      if(this.population[i].destroyed) {
-        this.population[i].dna.fitness *= 0.5
-      }
-      this.total_fitness += this.population[i].dna.fitness
-    }
-  }
-
-
-  // natural selection
-  natural_selection() {
-
-    // calculating probability of genes being picked
-    for(let i = 0; i < this.population_size; i ++) {
-      this.population[i].dna.prob = this.population[i].dna.fitness / this.total_fitness
-    }
-
-    this.parents = []
-
-    // selecting parents
-    for(let i = 0; i < this.parents_size; i ++) {
-      let pick = Math.random()
-
-      for(let j = 0; j < this.population_size; j ++) {
-        pick -= this.population[j].dna.prob
-        if(pick <= 0) {
-          this.parents.push(this.population[j])
-          break
+    generate() {
+        for (let i = 0; i < this.size; i ++) {
+            this.population.push(new Vehicle(320, 440));
+            this.population[i].dna = new DNA(this.lifespan);
+            this.population[i].dna.generate();
         }
-      }
-    }
-  }
 
-
-  // reproduces population
-  reproduction() {
-    let new_population = []
-
-    // reproduction
-    for(let i = 0; i < this.population_size; i ++) {
-      new_population.push(new Vehicle(width / 2, 580))
-      new_population[i].dna.genes = DNA.cross_over(this.parents)
+        this.generation ++;
     }
 
-    // mutation
-    for(let i = 0; i < this.population_size; i ++) {
-      new_population[i].dna.mutate(this.mutation_rate)
+    calc_Fitness(target) {
+        let best;
+
+        for (let i = 0; i < this.size; i ++) {
+            let dist = Vec2.dist(this.population[i].pos, target.pos);
+            let fitness = Math.pow(1 / dist, 2);
+                
+            if (this.population[i].dead || dist > 400)
+                fitness *= 0.5;
+
+            this.population[i].dna.fitness = fitness;
+            
+            // Selecting population with best fitness
+            if (!best)
+                best = this.population[i];
+
+            else if (best.dna.fitness < fitness)
+                best = this.population[i];
+        }
+
+        best.dna.fitness *= 10;
     }
 
-    this.population = new_population
-    this.generation += 1
-  }
+    naturalSelection() {
+        this.parents = [];
+        let pool = [...this.population];
 
+        // Selecting parents for reproduction
+        for (let i = 0; i < 4; i ++) {
+            let totalFitness = 0;
 
-  // updates the population
-  update(index) {
-    for(let i = 0; i < this.population_size; i ++) {
+            // Calculating total fitness form the pool
+            for (let j = 0; j < pool.length; j ++)
+                totalFitness += pool[j].dna.fitness;
+                
+            // Calculating probability for DNA to be picked
+            for (let j = 0; j < pool.length; j ++)
+                pool[j].dna.prob = pool[j].dna.fitness / totalFitness;
 
-      if(this.population[i].destroyed) continue
+            let pick = Math.random();
 
-      let steering_froce = this.population[i].dna.genes[index]
-        .limit(this.population[i].max_force)
+            for (let j = 0; j < pool.length; j ++) {
+                pick -= pool[j].dna.prob;
 
-      this.population[i].apply_force(steering_froce)
-      this.population[i].update()
+                if (pick <= 0) {
+                    this.parents.push(pool.splice(j, 1)[0]);
+                    break;
+                }
+            }
+        }
     }
-  }
 
+    reproduction() {
+        let newPopulation = [];
 
-  // displays the population
-  display() {
-    for(let i = 0; i < this.population_size; i ++) {
-      this.population[i].display()
+        // Reproduction by corssover
+        for (let i = 0; i < this.size; i ++) {
+            newPopulation.push(new Vehicle(320, 440));
+            newPopulation[i].dna = DNA.crossover(this.parents, this.lifespan);
+        }
+
+        // Mutation
+        for (let i = 0; i < this.size; i ++)
+            newPopulation[i].dna.mutate(this.mutationRate);
+
+        this.population = newPopulation;
+        this.generation ++;
     }
-  }
+
+    update(time) {
+        for (let i = 0; i < this.size; i ++) {
+            if (this.population[i].dead)
+                continue;
+    
+            let sf = this.population[i].calc_SteeringForce(time);
+        
+            this.population[i].applyForce(sf);
+            this.population[i].update();
+        }
+    }
+
+    check_Collision(walls) {
+        for (let i = 0; i < walls.length; i ++) {
+            let vec1 = walls[i].start;
+            let vec2 = walls[i].end;
+
+            let path = Vec2.sub(vec2, vec1);
+
+            for (let j = 0; j < this.size; j ++) {
+                let vec3 = Vec2.sub(this.population[j].pos, vec1);
+                
+                let angle = vec3.angle(path);
+
+                if (angle > Math.PI / 2)
+                    continue;
+
+                let proj = vec3.proj(path);
+
+                if (proj.mag() > path.mag())
+                    continue;
+
+                let distVec = Vec2.sub(vec3, proj);
+                
+                if (distVec.mag() <= 8)
+                    this.population[j].dead = true;
+            }
+        }
+    }
 }

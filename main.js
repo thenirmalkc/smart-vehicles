@@ -1,97 +1,80 @@
-const width = 800
-const height = 600
+const width = 640;
+const height = 480;
 
-let lifespan = 300
-let index = 0
+let lifespan = 10;
+let mutationRate = 0.02;
 
-// population
-let population_size = 200
-let mutation_rate = 0.05
+const vehicles = new Population(100, lifespan, mutationRate);
+const target = new Target(320, 40);
+const walls = [];
 
-// vehicle
-let vehicle
+let time = 0;
 
-// target
-let target = new Vector2D(width / 2, 20)
-
-// wall
-let wall = {
-  x: width / 2,
-  y: height / 2,
-  width: 300,
-  height: 10
-}
+let populationSize_span;
+let mutationRate_span;
+let generation_span;
+let lifespan_span;
 
 
 function setup() {
-  const canvas = createCanvas(width, height)
-  canvas.position((windowWidth - width) / 2, (windowHeight - height) / 2)
-  background(40)
+    const canvas = createCanvas(width, height);
+    canvas.position((windowWidth - width) / 2, (windowHeight - height) / 2);
 
-  population = new Population(population_size, mutation_rate, target)
+    walls.push(new Wall(180, 320, 240, 260));
+    walls.push(new Wall(460, 320, 400, 260));
+    walls.push(new Wall(280, 160, 360, 160));
 
-  // generating population
-  population.generate()
+    // Generating vehicle's population
+    vehicles.generate();
 
-  // selecting html elements
-  const population_size_span = document.querySelector('#population_size')
-  const mutation_rate_span = document.querySelector('#mutation_rate')
-  const generation_span = document.querySelector('#generation')
+    // Selecting html elements
+    populationSize_span = document.querySelector("#population-size")
+    mutationRate_span = document.querySelector("#mutation-rate")
+    generation_span = document.querySelector("#generation")
+    lifespan_span = document.querySelector("#lifespan")
 
-  // displying on html
-  population_size_span.innerText = population_size
-  mutation_rate_span.innerText = mutation_rate * 100 + '%'
-  generation_span.innerText = population.generation
-
+    // Displying on html
+    populationSize_span.innerText = vehicles.size;
+    mutationRate_span.innerText = mutationRate * 100 + "%"
+    generation_span.innerText = vehicles.generation;
+    lifespan_span.innerText = lifespan - time - 1;
 }
 
 
 function draw() {
-  if(index >= lifespan) {
-    index = 0
+    background(color(40));
 
-    // calculating fitness value of population
-    population.calc_fitness()
+    // Displaying vehicles
+    for (let i = 0; i < vehicles.size; i ++)
+        vehicles.population[i].display();
 
-    // selecting parents for reproduction
-    population.natural_selection()
+    vehicles.update(time);
+    vehicles.check_Collision(walls);
 
-    // reproducing new population
-    population.reproduction()
+    // Displaying walls
+    for (let i = 0; i < walls.length; i ++)
+        walls[i].display();
 
-
-    // selecting html elements
-    const generation_span = document.querySelector('#generation')
-
-    // displying on html
-    generation_span.innerText = population.generation
-  }
-
-  background(40)
-
-  // displaying target
-  fill('orangered')
-  circle(target.x, target.y, 10)
-
-  fill('skyblue')
-  noStroke()
-  rect(wall.x - wall.width / 2, wall.y - wall.height / 2, wall.width, wall.height)
-
-  population.display()
-  population.update(index)
-
-  // checking collision of population with object
-  check_collision(wall)
-  index ++
+    // Displaying target
+    target.display();
 }
 
 
-function check_collision(wall) {
-  for(let i = 0; i < population_size; i ++) {
-    const vehicle = population.population[i]
-    if(vehicle.destroyed) continue
-    else if(vehicle.location.x >= wall.x - wall.width / 2 && vehicle.location.x <= wall.x + wall.width / 2 && vehicle.location.y >= wall.y - wall.height / 2 && vehicle.location.y <= wall.y + wall.height / 2) {
-      vehicle.destroyed = true
+setInterval(() => {
+    // Updating html lifespan element
+    lifespan_span.innerText = lifespan - time - 1;
+   
+    time ++;
+
+    if (time >= vehicles.lifespan) {
+        time = 0;
+
+        vehicles.calc_Fitness(target);
+        vehicles.naturalSelection();
+        vehicles.reproduction();
+
+        // Updating html generation element
+        generation_span.innerText = vehicles.generation;
     }
-  }
-}
+
+}, 1000);

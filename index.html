@@ -1,20 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<script src="./lib/p5.min.js"></script>
-		<script src="./lib/vector-2d.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.3.1/lib/p5.js"></script>
+    <script src="./vec2.js"></script>
+    <script src="./wall.js"></script>
+    <script src="./target.js"></script>
+    <script src="./vehicle.js"></script>
     <script src="./dna.js"></script>
     <script src="./population.js"></script>
-    <script src="./vehicle.js"></script>
-		<script src="./main.js"></script>
-		<title>Document</title>
-	</head>
-	<body>
-    <br><br>
-    <div><b>Total Population</b>: <span id="population_size"></span></div>
-    <div><b>Mutation Rate</b>   : <span id="mutation_rate"></span></div>
+    <script src="./main.js"></script>
+    <style>
+        #lifespan {
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div><b>Total Population</b>: <span id="population-size"></span></div>
+    <div><b>Mutation Rate</b>   : <span id="mutation-rate"></span></div>
     <div><b>Generation</b>      : <span id="generation"></span></div>
-  </body>
+    <div><b>Lifespan</b>        : <span id="lifespan"></span></div>
+</body>
 </html>
