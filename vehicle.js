@@ -10,8 +10,8 @@ class Vehicle {
         
         this.mass = 1;
 
-        this.maxSpeed = 1.5;
-        this.maxForce = 0.05;
+        this.maxSpeed = 1;
+        this.maxForce = 0.025;
     }
 
     calc_SteeringForce(time) {
