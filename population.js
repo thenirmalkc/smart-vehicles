@@ -110,6 +110,9 @@ class Population {
             let path = Vec2.sub(vec2, vec1);
 
             for (let j = 0; j < this.size; j ++) {
+                if (this.population[j].dead)
+                    continue;
+
                 let vec3 = Vec2.sub(this.population[j].pos, vec1);
                 
                 let angle = vec3.angle(path);
