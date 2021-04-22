@@ -26,6 +26,10 @@ class Population {
 
         for (let i = 0; i < this.size; i ++) {
             let dist = Vec2.dist(this.population[i].pos, target.pos);
+            
+            if (dist < 1)
+                dist = 1;
+
             let fitness = Math.pow(1 / dist, 2);
                 
             if (this.population[i].dead || dist > 400)
